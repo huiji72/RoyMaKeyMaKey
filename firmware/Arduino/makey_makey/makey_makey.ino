@@ -1,5 +1,5 @@
 /*
- ************************************************
+          ************************************************
  ************** MAKEY MAKEY *********************
  ************************************************
  
@@ -22,7 +22,7 @@
 /////////////////////////
 // DEBUG DEFINITIONS ////               
 /////////////////////////
-//#define DEBUG
+#define DEBUG
 //#define DEBUG2 
 //#define DEBUG3 
 //#define DEBUG_TIMING
@@ -34,7 +34,8 @@
 ////////////////////////
 
 #define BUFFER_LENGTH    3     // 3 bytes gives us 24 samples
-#define NUM_INPUTS       18    // 6 on the front + 12 on the back
+#define NUM_INPUTS       12 // 18    // 6 on the front + 12 on the back
+#define NUM_OUTPUTS      6 // 6 on the side
 //#define TARGET_LOOP_TIME 694   // (1/60 seconds) / 24 samples = 694 microseconds per sample 
 //#define TARGET_LOOP_TIME 758  // (1/55 seconds) / 24 samples = 758 microseconds per sample 
 #define TARGET_LOOP_TIME 744  // (1/56 seconds) / 24 samples = 744 microseconds per sample 
@@ -46,7 +47,8 @@
 #define MOUSE_MOVE_RIGHT    -4
 
 #include "settings.h"
-
+#include <Servo.h> 
+ 
 /////////////////////////
 // STRUCT ///////////////
 /////////////////////////
@@ -66,6 +68,17 @@ MakeyMakeyInput;
 
 MakeyMakeyInput inputs[NUM_INPUTS];
 
+typedef struct {
+  byte pinNumber;
+  boolean moving;
+  boolean clenched;
+  int position;
+  Servo myservo;
+} 
+MakeyMakeyOutput;
+
+MakeyMakeyOutput outputs[NUM_OUTPUTS];
+
 ///////////////////////////////////
 // VARIABLES //////////////////////
 ///////////////////////////////////
@@ -84,8 +97,12 @@ int mouseHoldCount[NUM_INPUTS]; // used to store mouse movement hold data
 // input pin numbers for kickstarter production board
 int pinNumbers[NUM_INPUTS] = {
   12, 8, 13, 15, 7, 6,     // top of makey makey board
-  5, 4, 3, 2, 1, 0,        // left side of female header, KEBYBOARD
+  // 5, 4, 3, 2, 1, 0,        // left side of female header, KEBYBOARD
   23, 22, 21, 20, 19, 18   // right side of female header, MOUSE
+};
+
+int outpinNumbers[NUM_OUTPUTS] = {
+  5, 4, 3, 2, 1, 0
 };
 
 // input status LED pin numbers
@@ -107,6 +124,9 @@ int loopCounter = 0;
 ///////////////////////////
 void initializeArduino();
 void initializeInputs();
+void initializeOutputs();
+void clenchFinger(int idx);
+void unclenchFinger(int idx);
 void updateMeasurementBuffers();
 void updateBufferSums();
 void updateBufferIndex();
@@ -125,6 +145,7 @@ void setup()
 {
   initializeArduino();
   initializeInputs();
+  initializeOutputs();
   danceLeds();
 }
 
@@ -232,6 +253,70 @@ void initializeInputs() {
     Serial.println(i);
 #endif
 
+  }
+}
+
+///////////////////////////
+// INITIALIZE OUTPUTS
+///////////////////////////
+void initializeOutputs() {
+
+  for (int i=0; i<NUM_OUTPUTS; i++) {
+    outputs[i].pinNumber = outpinNumbers[i];
+    outputs[i].moving = false;
+    outputs[i].clenched = false;
+    outputs[i].position = 0;
+    outputs[i].myservo.attach(outputs[i].pinNumber);
+    outputs[i].myservo.write(0);
+
+
+//    pinMode(outputs[i].pinNumber, OUTPUT);
+//    digitalWrite(outputs[i].pinNumber, LOW);
+
+#ifdef DEBUG
+    Serial.print("writing to servo ");
+    Serial.println(i);
+#endif
+  
+#ifdef DEBUG
+    Serial.print("output");
+    Serial.println(i);
+#endif
+
+  }
+}
+
+void clenchFinger(int idx) {
+  if (!outputs[idx].clenched && !outputs[idx].moving) {
+#ifdef DEBUG
+    Serial.print("clenching servo");
+    Serial.print(idx);
+    Serial.print(" attached to ");
+    Serial.println(outputs[idx].pinNumber);
+#endif
+    outputs[idx].moving = true;
+    outputs[idx].position = 130;
+    outputs[idx].myservo.write(130);
+  } else if (outputs[idx].moving && outputs[idx].myservo.read() == outputs[idx].position) {
+    outputs[idx].moving = false;
+    outputs[idx].clenched = true;
+  }
+}
+
+void unclenchFinger(int idx) {
+  if (outputs[idx].clenched && !outputs[idx].moving) {
+#ifdef DEBUG
+    Serial.print("unclenching servo");
+    Serial.print(idx);
+    Serial.print(" attached to ");
+    Serial.println(outputs[idx].pinNumber);
+#endif
+    outputs[idx].moving = true;
+    outputs[idx].position = 0;
+    outputs[idx].myservo.write(0);
+  } else if (outputs[idx].moving && outputs[idx].myservo.read() == outputs[idx].position) {
+    outputs[idx].moving = false;
+    outputs[idx].clenched = false;
   }
 }
 
@@ -675,16 +760,22 @@ void updateOutLEDs()
       {
         mousePressed = 1;
       }
+      // TODO: abstract this out for the rest of the 5 other pins
+      if (i == 0) { clenchFinger(0); }
+    } else {
+      if (i == 0) { unclenchFinger(0); }
     }
   }
 
   if (keyPressed)
   {
+//    clenchFinger(0);
     digitalWrite(outputK, HIGH);
     TXLED1;
   }
   else
   {
+//    unclenchFinger(0);
     digitalWrite(outputK, LOW);
     TXLED0;
   }

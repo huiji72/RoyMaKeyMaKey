@@ -26,12 +26,12 @@ int keyCodes[NUM_INPUTS] = {
   
   // female header on the back left side
   
-  'w',                // pin D5
-  'a',                // pin D4
-  's',                // pin D3
-  'd',                // pin D2
-  'f',                // pin D1
-  'g',                // pin D0
+  // 'w',                // pin D5
+  // 'a',                // pin D4
+  // 's',                // pin D3
+  // 'd',                // pin D2
+  // 'f',                // pin D1
+  // 'g',                // pin D0
   
   // female header on the back right side
   

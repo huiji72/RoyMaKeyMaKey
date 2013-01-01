@@ -48,7 +48,7 @@
 
 #include "settings.h"
 #include <Servo.h> 
- 
+
 /////////////////////////
 // STRUCT ///////////////
 /////////////////////////
@@ -198,8 +198,8 @@ void initializeArduino() {
   delay(4000); // allow us time to reprogram in case things are freaking out
 #endif
 
-  Keyboard.begin();
-  Mouse.begin();
+  //Keyboard.begin();
+  //Mouse.begin();
 }
 
 ///////////////////////////
@@ -218,7 +218,7 @@ void initializeInputs() {
   Serial.println(pressThreshold);
   Serial.println(releaseThreshold);
 #endif
-
+ 
   for (int i=0; i<NUM_INPUTS; i++) {
     inputs[i].pinNumber = pinNumbers[i];
     inputs[i].keyCode = keyCodes[i];
@@ -257,27 +257,37 @@ void initializeInputs() {
 }
 
 ///////////////////////////
-// INITIALIZE OUTPUTS
+//  INITIALIZE OUTPUTS
 ///////////////////////////
 void initializeOutputs() {
-
+ 
   for (int i=0; i<NUM_OUTPUTS; i++) {
     outputs[i].pinNumber = outpinNumbers[i];
-    outputs[i].moving = false;
-    outputs[i].clenched = false;
-    outputs[i].position = 0;
+    outputs[i].moving = false;  
+    outputs[i].clenched = false;  
+    outputs[i].position = openPos[i];
     outputs[i].myservo.attach(outputs[i].pinNumber);
-    outputs[i].myservo.write(0);
-
-
-//    pinMode(outputs[i].pinNumber, OUTPUT);
-//    digitalWrite(outputs[i].pinNumber, LOW);
+    outputs[i].myservo.write(closedPos[i]) ; 
+    delay(500);
+     outputs[i].myservo.write(openPos[i]);
+ 
+    //    pinMode(outputs[i].pinNumber, OUTPUT);
+    //    digitalWrite(outputs[i].pinNumber, LOW);
 
 #ifdef DEBUG
     Serial.print("writing to servo ");
-    Serial.println(i);
+    Serial.print(outputs[i].pinNumber);
+    Serial.print(" in idx ");
+    Serial.print(i);
+    Serial.print(", open pos ");
+    Serial.print(openPos[i]);
+    Serial.print(", closed pos ");
+    Serial.print(closedPos[i]);
+    Serial.println("");
+   
+
 #endif
-  
+
 #ifdef DEBUG
     Serial.print("output");
     Serial.println(i);
@@ -295,9 +305,10 @@ void clenchFinger(int idx) {
     Serial.println(outputs[idx].pinNumber);
 #endif
     outputs[idx].moving = true;
-    outputs[idx].position = 130;
-    outputs[idx].myservo.write(130);
-  } else if (outputs[idx].moving && outputs[idx].myservo.read() == outputs[idx].position) {
+    outputs[idx].position = closedPos[idx];
+    outputs[idx].myservo.write(closedPos[idx]);
+  } 
+  else if (outputs[idx].moving && outputs[idx].myservo.read() == outputs[idx].position) {
     outputs[idx].moving = false;
     outputs[idx].clenched = true;
   }
@@ -312,9 +323,10 @@ void unclenchFinger(int idx) {
     Serial.println(outputs[idx].pinNumber);
 #endif
     outputs[idx].moving = true;
-    outputs[idx].position = 0;
-    outputs[idx].myservo.write(0);
-  } else if (outputs[idx].moving && outputs[idx].myservo.read() == outputs[idx].position) {
+    outputs[idx].position = openPos[idx];
+    outputs[idx].myservo.write(openPos[idx]);
+  } 
+  else if (outputs[idx].moving && outputs[idx].myservo.read() == outputs[idx].position) {
     outputs[idx].moving = false;
     outputs[idx].clenched = false;
   }
@@ -397,7 +409,7 @@ void updateInputStates() {
         inputChanged = true;
         inputs[i].pressed = false;
         if (inputs[i].isKey) {
-          Keyboard.release(inputs[i].keyCode);
+//          Keyboard.release(inputs[i].keyCode);
         }
         if (inputs[i].isMouseMotion) {  
           mouseHoldCount[i] = 0;  // input becomes released, reset mouse hold
@@ -412,7 +424,7 @@ void updateInputStates() {
         inputChanged = true;
         inputs[i].pressed = true; 
         if (inputs[i].isKey) {
-          Keyboard.press(inputs[i].keyCode);
+      //    Keyboard.press(inputs[i].keyCode);
         }
       }
     }
@@ -473,18 +485,18 @@ void sendMouseButtonEvents() {
       if (inputs[i].isMouseButton) {
         if (inputs[i].pressed) {
           if (inputs[i].keyCode == MOUSE_LEFT) {
-            Mouse.press(MOUSE_LEFT);
+           // Mouse.press(MOUSE_LEFT);
           } 
           if (inputs[i].keyCode == MOUSE_RIGHT) {
-            Mouse.press(MOUSE_RIGHT);
+          //  Mouse.press(MOUSE_RIGHT);
           } 
         } 
         else if (inputs[i].prevPressed) {
           if (inputs[i].keyCode == MOUSE_LEFT) {
-            Mouse.release(MOUSE_LEFT);
+          //  Mouse.release(MOUSE_LEFT);
           } 
           if (inputs[i].keyCode == MOUSE_RIGHT) {
-            Mouse.release(MOUSE_RIGHT);
+          //  Mouse.release(MOUSE_RIGHT);
           }           
         }
       }
@@ -571,7 +583,7 @@ void sendMouseMovementEvents() {
     // now move the mouse
     if( !((horizmotion == 0) && (vertmotion==0)) )
     {
-      Mouse.move(horizmotion * PIXELS_PER_MOUSE_STEP, vertmotion * PIXELS_PER_MOUSE_STEP);
+    //  Mouse.move(horizmotion * PIXELS_PER_MOUSE_STEP, vertmotion * PIXELS_PER_MOUSE_STEP);
     }
   }
 }
@@ -760,37 +772,42 @@ void updateOutLEDs()
       {
         mousePressed = 1;
       }
-      // TODO: abstract this out for the rest of the 5 other pins
-      if (i == 0) { clenchFinger(0); }
-    } else {
-      if (i == 0) { unclenchFinger(0); }
+      if (i < NUM_OUTPUTS) { 
+        clenchFinger(i);  
+      }
+    } 
+    else {
+      if (i < NUM_OUTPUTS) { 
+        unclenchFinger(i); 
+      }
     }
   }
 
   if (keyPressed)
   {
-//    clenchFinger(0);
-    digitalWrite(outputK, HIGH);
+    //    clenchFinger(0);
+    //digitalWrite(outputK, HIGH);
     TXLED1;
   }
   else
   {
-//    unclenchFinger(0);
-    digitalWrite(outputK, LOW);
+    //    unclenchFinger(0);
+    //digitalWrite(outputK, LOW);
     TXLED0;
   }
 
   if (mousePressed)
   {
-    digitalWrite(outputM, HIGH);
+    //digitalWrite(outputM, HIGH);
     RXLED1;
   }
   else
   {
-    digitalWrite(outputM, LOW);
+    //digitalWrite(outputM, LOW);
     RXLED0;
   }
 }
+
 
 
 

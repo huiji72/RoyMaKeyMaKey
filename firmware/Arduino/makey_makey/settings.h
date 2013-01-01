@@ -14,6 +14,15 @@
 
 */
 
+int openPos[NUM_OUTPUTS] = {
+  180, 10, 180, 0, 0, 160
+};
+
+int closedPos[NUM_OUTPUTS] = {
+  40, 130, 0, 160, 130, 0
+};
+
+
 int keyCodes[NUM_INPUTS] = {
   // top side of the makey makey board
  

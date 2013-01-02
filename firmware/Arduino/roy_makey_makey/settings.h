@@ -23,9 +23,6 @@ int closedPos[NUM_OUTPUTS] = {
 };
 
 
-int keyCodes[NUM_INPUTS] = {
-};
-
 ///////////////////////////
 // NOISE CANCELLATION /////
 ///////////////////////////

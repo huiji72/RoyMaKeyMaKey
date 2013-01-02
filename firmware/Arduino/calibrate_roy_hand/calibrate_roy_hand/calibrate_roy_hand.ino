@@ -1,4 +1,6 @@
-// Use this file for calibrating the Roy servos
+// Use this file to calibrate the Roy servo
+// ranges you want to use
+//
 #include <Servo.h> 
  
  // a maximum of eight servo objects can be created 
@@ -39,115 +41,14 @@ void setup() {
 
   delay(1000);
 
-//  thumb(1);
-//  index(1);
-//  middle(1);
-  ring(1);
-  pinky(1);
-
-  delay(1000);
-
-//  thumb(0);
-//  index(0);
-//  middle(0);
-  ring(0);
-  pinky(0);
-  delay(1000);
-
   thumb(1);
   index(1);
   middle(1);
   ring(1);
   pinky(1);
+}
 
-  delay(1000);
-  return;
-
-  thumb(0);
-  index(1);
-  middle(1);
-  ring(1);
-  pinky(1);
-
-  delay(1000);
-  
-  thumb(1);
-  thumb(0);
-  palm(1);  
-  palm(0);
-
-  delay(1000);
-  
-  thumb(0);
-  thumb(1);
-  palm(0);  
-  palm(1);
-    
-
-  thumb(1);
-  delay(100);
-  index(1);
-  delay(100);
-  middle(1);
-  delay(100);
-  ring(1);
-  delay(100);
-  pinky(1);
-
-  delay(1000);
-  
-  thumb(0);
-  index(0);
-  middle(0);
-  ring(0);
-  pinky(0);
-
-  delay(1000);
-
-  thumb(1);
-  delay(100);
-  index(1);
-  delay(100);
-  middle(1);
-  delay(100);
-  ring(1);
-  
-  delay(1000);
-
-  
-  pinky(1);
-  thumb(0);
-  index(0);
-  middle(0);
-  ring(0);
-  pinky(0);
-
-//  middle(0);
-//  pinky(0);
-
-//  thumb(1);
-//  index(1);
-//  middle(1);
-//  pinky(1);
-//
-//  delay(1000);
-  thumb(1);
-  index(1);
-  middle(0);
-  ring(1);
-  pinky(1);
-} 
- 
- 
 void loop() {
-//  thumb(1);
-//  index(1);
-//  middle(1);
-//  ring(1);
-//  pinky(1);
-//  delay(1000);
-//
-//  delay(1000);
 }
 
 

@@ -3,7 +3,6 @@
 //
 #include <Servo.h> 
  
- // a maximum of eight servo objects can be created 
 #include "Arduino.h"
 void setup();
 void loop();
